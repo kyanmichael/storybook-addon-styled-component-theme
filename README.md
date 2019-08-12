@@ -4,17 +4,20 @@
 
 ![](https://media.giphy.com/media/FfFvOA9C0h9bhfCuNX/giphy.gif)
 
-#### Notice
+## Notice
 Only support storybook 4 and newer
 
 
-#### Installation
+## Setup
+
+### 1. Install
 ```bash
 yarn add storybook-addon-styled-component-theme --dev
 ```
 
+### 2. Register
 
-#### Add to .storybook/addons.js 
+Add to `.storybook/addons.js`:
 
 ```javascript
 import 'storybook-addon-styled-component-theme/dist/src/register'; // v1.1.0^
@@ -22,7 +25,10 @@ import 'storybook-addon-styled-component-theme/dist/src/register'; // v1.1.0^
 import 'storybook-addon-styled-component-theme/dist/register'; // v1.0.7
 ```
 
-#### addDecorator to .storybook/config.js
+### 3. Configure themes
+
+Configure `themes` in `.storybook/config.js` for all stories:
+
 ```javascript
 import {addDecorator} from '@storybook/react';
 import {withThemesProvider} from 'storybook-addon-styled-component-theme';
@@ -31,11 +37,9 @@ const themes = [theme1, theme2];
 addDecorator(withThemesProvider(themes));
 ```
 
-> or
+or configure `themes` for a single group of stories:
 
-#### addDecorator to stories 
-
-```javascript
+```jsx
 import {withThemesProvider} from 'storybook-addon-styled-component-theme';
 
 const themes = [theme1, theme2];
@@ -45,11 +49,21 @@ storiesOf("demo", module)
   .add("demo div", () => <div>DEMO</div>);
 ```
 
-#### Remind
+Once `addDecorator()` has been called, you can customise the `themes` for a single story:
+
+```jsx
+const themes = [theme3, theme4];
+
+storiesOf("demo", module)
+  .add("demo div", () => <div>DEMO</div>, { themeSelector: { themes } });
+```
+
+
+## Remind
 Make sure every theme object has a `name` property
 
 
-#### Contributing
+## Contributing
 
 `yarn`
 
