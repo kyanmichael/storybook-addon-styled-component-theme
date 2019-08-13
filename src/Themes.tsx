@@ -55,11 +55,11 @@ export const Themes = compose<BaseComponentProps, ThemeProps>(
     lifecycle<BaseComponentProps, BaseComponentProps>({
         componentDidMount() {
             const {channel, onReceiveThemes} = this.props;
-            channel.on("setThemes", onReceiveThemes);
+            channel.on("decoratorThemesReceived", onReceiveThemes);
         },
         componentWillUnmount() {
             const {channel, onReceiveThemes} = this.props;
-            channel.removeListener("setThemes", onReceiveThemes);
+            channel.removeListener("decoratorThemesReceived", onReceiveThemes);
         },
     }),
     branch<BaseComponentProps>(
