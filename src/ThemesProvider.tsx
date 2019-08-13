@@ -16,7 +16,7 @@ interface ThemesProviderMapProps {
 
 interface ThemesProviderState {
     stateTheme: Theme;
-    setTheme: (theme: Theme) => void;
+    setStateTheme: (theme: Theme) => void;
 }
 
 interface ThemesProviderHandler {
@@ -35,11 +35,11 @@ export const ThemesProvider = compose<BaseComponentProps, ThemesProviderProps>(
         const Provider = CustomThemeProvider ? CustomThemeProvider : ThemeProvider;
         return {...props, Provider};
     }),
-    withState("stateTheme", "setTheme", null),
+    withState("stateTheme", "setStateTheme", null),
     withHandlers<ThemesProviderProps & ThemesProviderMapProps & ThemesProviderState, ThemesProviderHandler>({
-        onSelectTheme: ({setTheme, decoratorThemes}) => (name) => {
+        onSelectTheme: ({setStateTheme, decoratorThemes}) => (name) => {
             const theme = decoratorThemes.find((th: Theme) => th.name === name);
-            setTheme(theme);
+            setStateTheme(theme);
         },
     }),
     lifecycle<BaseComponentProps, BaseComponentProps>({
