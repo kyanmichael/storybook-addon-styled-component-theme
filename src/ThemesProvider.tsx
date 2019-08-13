@@ -46,13 +46,13 @@ export const ThemesProvider = compose<BaseComponentProps, ThemesProviderProps>(
         componentDidMount() {
             const {onSelectTheme, decoratorThemes} = this.props;
             const channel = addons.getChannel();
-            channel.on("selectTheme", onSelectTheme);
+            channel.on("panelThemeSelected", onSelectTheme);
             channel.emit("decoratorThemesReceived", decoratorThemes);
         },
         componentWillUnmount() {
             const {onSelectTheme} = this.props;
             const channel = addons.getChannel();
-            channel.removeListener("selectTheme", onSelectTheme);
+            channel.removeListener("panelThemeSelected", onSelectTheme);
         },
     }),
     branch<BaseComponentProps>(
