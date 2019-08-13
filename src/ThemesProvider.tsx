@@ -6,7 +6,7 @@ import {ThemeProvider, ThemeProviderComponent} from "styled-components";
 import {Theme} from "./types/Theme";
 
 export interface ThemesProviderProps {
-    themes: List<Theme>;
+    decoratorThemes: List<Theme>;
     CustomThemeProvider?: ThemeProviderComponent<any>;
 }
 
@@ -37,17 +37,17 @@ export const ThemesProvider = compose<BaseComponentProps, ThemesProviderProps>(
     }),
     withState("theme", "setTheme", null),
     withHandlers<ThemesProviderProps & ThemesProviderMapProps & ThemesProviderState, ThemesProviderHandler>({
-        onSelectTheme: ({setTheme, themes}) => (name) => {
-            const theme = themes.find((th: Theme) => th.name === name);
+        onSelectTheme: ({setTheme, decoratorThemes}) => (name) => {
+            const theme = decoratorThemes.find((th: Theme) => th.name === name);
             setTheme(theme);
         },
     }),
     lifecycle<BaseComponentProps, BaseComponentProps>({
         componentDidMount() {
-            const {onSelectTheme, themes} = this.props;
+            const {onSelectTheme, decoratorThemes} = this.props;
             const channel = addons.getChannel();
             channel.on("selectTheme", onSelectTheme);
-            channel.emit("setThemes", themes);
+            channel.emit("setThemes", decoratorThemes);
         },
         componentWillUnmount() {
             const {onSelectTheme} = this.props;
