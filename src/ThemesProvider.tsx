@@ -15,7 +15,7 @@ interface ThemesProviderMapProps {
 }
 
 interface ThemesProviderState {
-    theme: Theme;
+    stateTheme: Theme;
     setTheme: (theme: Theme) => void;
 }
 
@@ -25,8 +25,8 @@ interface ThemesProviderHandler {
 
 type BaseComponentProps = ThemesProviderProps & ThemesProviderMapProps & ThemesProviderState & ThemesProviderHandler;
 
-const BaseComponent: React.SFC<BaseComponentProps> = ({theme, Provider, children}) => (
-  <Provider theme={theme} children={children as any}/>
+const BaseComponent: React.SFC<BaseComponentProps> = ({stateTheme, Provider, children}) => (
+  <Provider theme={stateTheme} children={children as any}/>
 );
 
 export const ThemesProvider = compose<BaseComponentProps, ThemesProviderProps>(
@@ -35,7 +35,7 @@ export const ThemesProvider = compose<BaseComponentProps, ThemesProviderProps>(
         const Provider = CustomThemeProvider ? CustomThemeProvider : ThemeProvider;
         return {...props, Provider};
     }),
-    withState("theme", "setTheme", null),
+    withState("stateTheme", "setTheme", null),
     withHandlers<ThemesProviderProps & ThemesProviderMapProps & ThemesProviderState, ThemesProviderHandler>({
         onSelectTheme: ({setTheme, decoratorThemes}) => (name) => {
             const theme = decoratorThemes.find((th: Theme) => th.name === name);
@@ -56,7 +56,7 @@ export const ThemesProvider = compose<BaseComponentProps, ThemesProviderProps>(
         },
     }),
     branch<BaseComponentProps>(
-        (props) => !props.theme,
+        (props) => !props.stateTheme,
         renderNothing,
     ),
 )(BaseComponent);
