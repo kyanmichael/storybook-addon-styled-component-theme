@@ -10,7 +10,7 @@ export interface ThemeProps {
 }
 
 interface ThemeState {
-    theme: Theme;
+    stateTheme: Theme;
     setTheme: (theme: Theme) => void;
     themes: List<Theme>;
     setThemes: (themes: List<Theme>) => void;
@@ -23,17 +23,17 @@ interface ThemeHandler {
 
 type BaseComponentProps = ThemeProps & ThemeState & ThemeHandler;
 
-const BaseComponent: React.SFC<BaseComponentProps> = ({onSelectTheme, themes, theme}) => (
+const BaseComponent: React.SFC<BaseComponentProps> = ({onSelectTheme, themes, stateTheme}) => (
     <div style={RowStyle}>
         {themes.map((th, i) => {
-            const buttonStyle = th === theme ? SelectedButtonStyle : ButtonStyle;
+            const buttonStyle = th === stateTheme ? SelectedButtonStyle : ButtonStyle;
             return <div style={buttonStyle} key={i} onClick={() => onSelectTheme(th)}>{th.name}</div>;
         }).toArray()}
     </div>
 );
 
 export const Themes = compose<BaseComponentProps, ThemeProps>(
-    withState("theme", "setTheme", null),
+    withState("stateTheme", "setTheme", null),
     withState("themes", "setThemes", List()),
     withHandlers<ThemeProps & ThemeState, ThemeHandler>({
         onSelectTheme: ({channel, setTheme, api}) => (theme) => {
@@ -63,7 +63,7 @@ export const Themes = compose<BaseComponentProps, ThemeProps>(
         },
     }),
     branch<BaseComponentProps>(
-        ({theme, active}) => !theme || !active,
+        ({stateTheme, active}) => !stateTheme || !active,
         renderNothing,
     ),
 )(BaseComponent);
