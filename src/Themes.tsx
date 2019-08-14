@@ -11,7 +11,7 @@ export interface ThemeProps {
 
 interface ThemeState {
     stateTheme: Theme;
-    setTheme: (theme: Theme) => void;
+    setStateTheme: (theme: Theme) => void;
     themes: List<Theme>;
     setThemes: (themes: List<Theme>) => void;
 }
@@ -33,21 +33,21 @@ const BaseComponent: React.SFC<BaseComponentProps> = ({onSelectTheme, themes, st
 );
 
 export const Themes = compose<BaseComponentProps, ThemeProps>(
-    withState("stateTheme", "setTheme", null),
+    withState("stateTheme", "setStateTheme", null),
     withState("themes", "setThemes", List()),
     withHandlers<ThemeProps & ThemeState, ThemeHandler>({
-        onSelectTheme: ({channel, setTheme, api}) => (theme) => {
-            setTheme(theme);
+        onSelectTheme: ({channel, setStateTheme, api}) => (theme) => {
+            setStateTheme(theme);
             api.setQueryParams({theme: theme.name});
             channel.emit("panelThemeSelected", theme.name);
         },
-        onReceiveThemes: ({setTheme, setThemes, channel, api}) => (newThemes: Theme[]) => {
+        onReceiveThemes: ({setStateTheme, setThemes, channel, api}) => (newThemes: Theme[]) => {
             const themes = List(newThemes);
             const themeName = api.getQueryParam("theme");
             setThemes(List(themes));
             if (themes.count() > 0) {
                 const theme = themes.find((t) => t.name === themeName) || themes.first();
-                setTheme(theme);
+                setStateTheme(theme);
                 channel.emit("panelThemeSelected", theme.name);
             }
         },
