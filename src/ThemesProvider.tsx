@@ -20,7 +20,7 @@ interface ThemesProviderState {
 }
 
 interface ThemesProviderHandler {
-    onSelectTheme: (name: string) => void;
+    onSelectTheme: (theme: Theme) => void;
 }
 
 type BaseComponentProps = ThemesProviderProps & ThemesProviderMapProps & ThemesProviderState & ThemesProviderHandler;
@@ -37,8 +37,7 @@ export const ThemesProvider = compose<BaseComponentProps, ThemesProviderProps>(
     }),
     withState("stateTheme", "setStateTheme", null),
     withHandlers<ThemesProviderProps & ThemesProviderMapProps & ThemesProviderState, ThemesProviderHandler>({
-        onSelectTheme: ({setStateTheme, decoratorThemes}) => (name) => {
-            const theme = decoratorThemes.find((th: Theme) => th.name === name);
+        onSelectTheme: ({setStateTheme}) => (theme) => {
             setStateTheme(theme);
         },
     }),
