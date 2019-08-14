@@ -1,7 +1,9 @@
 import {List} from "immutable";
 import * as React from "react";
+import {STORY_RENDERED} from "@storybook/core-events";
 import {branch, compose, lifecycle, renderNothing, withHandlers, withState} from "recompose";
 import {Theme} from "./types/Theme";
+import {metadataKey} from "./constants";
 
 export interface ThemeProps {
     channel: any;
@@ -19,6 +21,7 @@ interface ThemeState {
 interface ThemeHandler {
     onSelectTheme: (theme: Theme) => void;
     onReceiveThemes: (theme: Theme[]) => void;
+    onStoryRender: (storyId: string) => void;
 }
 
 type BaseComponentProps = ThemeProps & ThemeState & ThemeHandler;
@@ -51,15 +54,24 @@ export const Themes = compose<BaseComponentProps, ThemeProps>(
                 channel.emit("panelThemeSelected", theme);
             }
         },
+        onStoryRender: ({api, channel}) => (storyId: string) => {
+            const params = api.getParameters(storyId, metadataKey);
+            if (params && params.themes) {
+                channel.emit("storyThemesReceived", params.themes);
+            }
+        },
     }),
     lifecycle<BaseComponentProps, BaseComponentProps>({
         componentDidMount() {
-            const {channel, onReceiveThemes} = this.props;
+            const {api, channel, onReceiveThemes, onStoryRender} = this.props;
             channel.on("decoratorThemesReceived", onReceiveThemes);
+            channel.on("storyThemesReceived", onReceiveThemes);
+            api.on(STORY_RENDERED, onStoryRender);
         },
         componentWillUnmount() {
             const {channel, onReceiveThemes} = this.props;
             channel.removeListener("decoratorThemesReceived", onReceiveThemes);
+            channel.removeListener("storyThemesReceived", onReceiveThemes);
         },
     }),
     branch<BaseComponentProps>(
