@@ -14,6 +14,7 @@ export interface ThemeProps {
 export interface ThemeMetadataParams {
     themes?: Theme[];
     singleThemeMessage?: string;
+    showSingleThemeButton?: boolean;
 }
 
 interface ThemeState {
@@ -23,6 +24,8 @@ interface ThemeState {
     setStateThemes: (themes: List<Theme>) => void;
     singleThemeMessage?: string;
     setSingleThemeMessage: (singleThemeMessage: string) => void;
+    showSingleThemeButton?: boolean;
+    setShowSingleThemeButton: (showSingleThemeButton: boolean) => void;
 }
 
 interface ThemeHandler {
@@ -34,17 +37,19 @@ interface ThemeHandler {
 type BaseComponentProps = ThemeProps & ThemeState & ThemeHandler;
 
 const BaseComponent: React.SFC<BaseComponentProps> =
-    ({onSelectTheme, stateThemes, stateTheme, singleThemeMessage}) => (
+    ({onSelectTheme, stateThemes, stateTheme, singleThemeMessage, showSingleThemeButton}) => (
         <div>
             {singleThemeMessage && (
                 <div style={MessageStyle}>{singleThemeMessage}</div>
             )}
-            <div style={RowStyle}>
-                {stateThemes.map((th, i) => {
-                    const buttonStyle = th === stateTheme ? SelectedButtonStyle : ButtonStyle;
-                    return <div style={buttonStyle} key={i} onClick={() => onSelectTheme(th)}>{th.name}</div>;
-                }).toArray()}
-            </div>
+            {(stateThemes.size > 1 || showSingleThemeButton) && (
+                <div style={RowStyle}>
+                    {stateThemes.map((th, i) => {
+                        const buttonStyle = th === stateTheme ? SelectedButtonStyle : ButtonStyle;
+                        return <div style={buttonStyle} key={i} onClick={() => onSelectTheme(th)}>{th.name}</div>;
+                    }).toArray()}
+                </div>
+            )}
         </div>
     );
 
@@ -52,6 +57,7 @@ export const Themes = compose<BaseComponentProps, ThemeProps>(
     withState("stateTheme", "setStateTheme", null),
     withState("stateThemes", "setStateThemes", List()),
     withState("singleThemeMessage", "setSingleThemeMessage", null),
+    withState("showSingleThemeButton", "setShowSingleThemeButton", true),
     withHandlers<ThemeProps & ThemeState, ThemeHandler>({
         onSelectTheme: ({channel, setStateTheme, api}) => (theme) => {
             setStateTheme(theme);
@@ -68,10 +74,13 @@ export const Themes = compose<BaseComponentProps, ThemeProps>(
                 channel.emit("panelThemeSelected", theme);
             }
         },
-        onStoryRender: ({api, channel, setSingleThemeMessage}) => (storyId: string) => {
+        onStoryRender: ({api, channel, setSingleThemeMessage, setShowSingleThemeButton}) => (storyId: string) => {
             const params: ThemeMetadataParams | undefined = api.getParameters(storyId, metadataKey);
             if (params) {
                 setSingleThemeMessage(params.singleThemeMessage);
+                if (typeof params.showSingleThemeButton === "boolean") {
+                    setShowSingleThemeButton(params.showSingleThemeButton);
+                }
                 if (params.themes) {
                     channel.emit("storyThemesReceived", params.themes);
                 }
