@@ -11,11 +11,18 @@ export interface ThemeProps {
     active: boolean;
 }
 
+export interface ThemeMetadataParams {
+    themes?: Theme[];
+    singleThemeMessage?: string;
+}
+
 interface ThemeState {
     stateTheme: Theme;
     setStateTheme: (theme: Theme) => void;
     stateThemes: List<Theme>;
     setStateThemes: (themes: List<Theme>) => void;
+    singleThemeMessage?: string;
+    setSingleThemeMessage: (singleThemeMessage: string) => void;
 }
 
 interface ThemeHandler {
@@ -26,18 +33,25 @@ interface ThemeHandler {
 
 type BaseComponentProps = ThemeProps & ThemeState & ThemeHandler;
 
-const BaseComponent: React.SFC<BaseComponentProps> = ({onSelectTheme, stateThemes, stateTheme}) => (
-    <div style={RowStyle}>
-        {stateThemes.map((th, i) => {
-            const buttonStyle = th === stateTheme ? SelectedButtonStyle : ButtonStyle;
-            return <div style={buttonStyle} key={i} onClick={() => onSelectTheme(th)}>{th.name}</div>;
-        }).toArray()}
-    </div>
-);
+const BaseComponent: React.SFC<BaseComponentProps> =
+    ({onSelectTheme, stateThemes, stateTheme, singleThemeMessage}) => (
+        <div>
+            {singleThemeMessage && (
+                <div style={MessageStyle}>{singleThemeMessage}</div>
+            )}
+            <div style={RowStyle}>
+                {stateThemes.map((th, i) => {
+                    const buttonStyle = th === stateTheme ? SelectedButtonStyle : ButtonStyle;
+                    return <div style={buttonStyle} key={i} onClick={() => onSelectTheme(th)}>{th.name}</div>;
+                }).toArray()}
+            </div>
+        </div>
+    );
 
 export const Themes = compose<BaseComponentProps, ThemeProps>(
     withState("stateTheme", "setStateTheme", null),
     withState("stateThemes", "setStateThemes", List()),
+    withState("singleThemeMessage", "setSingleThemeMessage", null),
     withHandlers<ThemeProps & ThemeState, ThemeHandler>({
         onSelectTheme: ({channel, setStateTheme, api}) => (theme) => {
             setStateTheme(theme);
@@ -54,10 +68,13 @@ export const Themes = compose<BaseComponentProps, ThemeProps>(
                 channel.emit("panelThemeSelected", theme);
             }
         },
-        onStoryRender: ({api, channel}) => (storyId: string) => {
-            const params = api.getParameters(storyId, metadataKey);
-            if (params && params.themes) {
-                channel.emit("storyThemesReceived", params.themes);
+        onStoryRender: ({api, channel, setSingleThemeMessage}) => (storyId: string) => {
+            const params: ThemeMetadataParams | undefined = api.getParameters(storyId, metadataKey);
+            if (params) {
+                setSingleThemeMessage(params.singleThemeMessage);
+                if (params.themes) {
+                    channel.emit("storyThemesReceived", params.themes);
+                }
             }
         },
     }),
@@ -98,8 +115,15 @@ const fontFamily: string = [
     "sans-serif",
 ].join(", ");
 
+const margin: string = "10px";
+
+const MessageStyle: React.CSSProperties = {
+    fontFamily,
+    margin,
+};
+
 const RowStyle: React.CSSProperties = {
-    padding: "10px",
+    margin,
     display: "flex",
     flexDirection: "row",
     alignItems: "flex-start",
