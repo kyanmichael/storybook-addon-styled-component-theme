@@ -80,6 +80,24 @@ export const Themes = compose<BaseComponentProps, ThemeProps>(
     ),
 )(BaseComponent);
 
+const fontFamily: string = [
+    "-apple-system",
+    "\".SFNSText-Regular\"",
+    "\"San Francisco\"",
+    "BlinkMacSystemFont",
+    "\"Segoe UI\"",
+    "\"Roboto\"",
+    "\"Oxygen\"",
+    "\"Ubuntu\"",
+    "\"Cantarell\"",
+    "\"Fira Sans\"",
+    "\"Droid Sans\"",
+    "\"Helvetica Neue\"",
+    "\"Lucida Grande\"",
+    "\"Arial\"",
+    "sans-serif",
+].join(", ");
+
 const RowStyle: React.CSSProperties = {
     padding: "10px",
     display: "flex",
@@ -95,8 +113,7 @@ const ButtonStyle: React.CSSProperties = {
     padding: "13px",
     marginRight: "15px",
     cursor: "pointer",
-    // tslint:disable-next-line:max-line-length
-    fontFamily: "-apple-system, \".SFNSText-Regular\", \"San Francisco\", BlinkMacSystemFont, \"Segoe UI\", \"Roboto\", \"Oxygen\", \"Ubuntu\", \"Cantarell\", \"Fira Sans\", \"Droid Sans\", \"Helvetica Neue\", \"Lucida Grande\", \"Arial\", sans-serif",
+    fontFamily,
     lineHeight: "25px",
 };
 
