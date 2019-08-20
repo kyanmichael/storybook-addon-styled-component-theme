@@ -39,7 +39,7 @@ type BaseComponentProps = ThemeProps & ThemeState & ThemeHandler;
 const BaseComponent: React.SFC<BaseComponentProps> =
     ({onSelectTheme, stateThemes, stateTheme, singleThemeMessage, showSingleThemeButton}) => (
         <div>
-            {singleThemeMessage && (
+            {stateThemes.size === 1 && singleThemeMessage && (
                 <div style={MessageStyle}>{singleThemeMessage}</div>
             )}
             {(stateThemes.size > 1 || showSingleThemeButton) && (
