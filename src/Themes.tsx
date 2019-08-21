@@ -28,9 +28,13 @@ type BaseComponentProps = ThemeProps & ThemeState & ThemeHandler;
 
 const BaseComponent: React.SFC<BaseComponentProps> = ({onSelectTheme, stateThemes, stateTheme}) => (
     <div style={RowStyle}>
-        {stateThemes.map((th, i) => {
-            const buttonStyle = th === stateTheme ? SelectedButtonStyle : ButtonStyle;
-            return <div style={buttonStyle} key={i} onClick={() => onSelectTheme(th)}>{th.name}</div>;
+        {stateThemes.map((th: Theme) => {
+            const style: React.CSSProperties = ((th === stateTheme) ? SelectedButtonStyle : ButtonStyle);
+            return (
+                <div style={style} key={th.name} onClick={() => onSelectTheme(th)}>
+                    {th.name}
+                </div>
+            );
         }).toArray()}
     </div>
 );
