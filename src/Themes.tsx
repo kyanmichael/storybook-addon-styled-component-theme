@@ -98,6 +98,7 @@ export const Themes = compose<BaseComponentProps, ThemeProps>(
             if (themes.count() > 0) {
                 const theme = themes.find((t) => t.name === themeName) || themes.first();
                 setStateTheme(theme);
+                api.setQueryParams({theme: theme.name});
                 channel.emit("panelThemeSelected", theme);
             }
         },
