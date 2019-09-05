@@ -88,3 +88,4 @@ Commits:
 * 26fdb26  –  Implement `buttonAttributes` functionality
 * 20d3b93  –  Update `Themes.spec.tsx`
 * 890d82b  –  Update `README.md`
+* a3dc4c7  –  `onReceiveThemes()`: need to call `setQueryParams()`
