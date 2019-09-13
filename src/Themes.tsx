@@ -1,7 +1,9 @@
 import {List} from "immutable";
 import * as React from "react";
-import {branch, compose, lifecycle, renderNothing, withHandlers, withState} from "recompose";
+import {STORY_RENDERED} from "@storybook/core-events";
+import {branch, compose, lifecycle, mapProps, renderNothing, withHandlers, withState} from "recompose";
 import {Theme} from "./types/Theme";
+import {metadataKey} from "./constants";
 
 export interface ThemeProps {
     channel: any;
@@ -9,67 +11,143 @@ export interface ThemeProps {
     active: boolean;
 }
 
+export interface ThemeMetadataParams {
+    themes?: Theme[];
+    singleThemeMessage?: string;
+    showSingleThemeButton?: boolean;
+}
+
+interface ThemeExtraProps {
+    singleThemeMessage?: string;
+    showSingleThemeButton: boolean;
+}
+
 interface ThemeState {
-    theme: Theme;
-    setTheme: (theme: Theme) => void;
-    themes: List<Theme>;
-    setThemes: (themes: List<Theme>) => void;
+    stateTheme: Theme;
+    setStateTheme: (theme: Theme) => void;
+    stateThemes: List<Theme>;
+    setStateThemes: (themes: List<Theme>) => void;
 }
 
 interface ThemeHandler {
     onSelectTheme: (theme: Theme) => void;
     onReceiveThemes: (theme: Theme[]) => void;
+    onStoryRender: (storyId: string) => void;
 }
 
-type BaseComponentProps = ThemeProps & ThemeState & ThemeHandler;
+type BaseComponentProps = ThemeProps & ThemeExtraProps & ThemeState & ThemeHandler;
 
-const BaseComponent: React.SFC<BaseComponentProps> = ({onSelectTheme, themes, theme}) => (
-    <div style={RowStyle}>
-        {themes.map((th, i) => {
-            const buttonStyle = th === theme ? SelectedButtonStyle : ButtonStyle;
-            return <div style={buttonStyle} key={i} onClick={() => onSelectTheme(th)}>{th.name}</div>;
-        }).toArray()}
-    </div>
-);
+const BaseComponent: React.SFC<BaseComponentProps> =
+    ({onSelectTheme, stateThemes, stateTheme, singleThemeMessage, showSingleThemeButton}) => (
+        <div>
+            {stateThemes.size === 1 && singleThemeMessage && (
+                <div style={MessageStyle}>{singleThemeMessage}</div>
+            )}
+            {(stateThemes.size > 1 || showSingleThemeButton) && (
+                <div style={RowStyle}>
+                    {stateThemes.map((theme: Theme) => {
+                        const style: React.CSSProperties = ((theme === stateTheme) ? SelectedButtonStyle : ButtonStyle);
+                        return (
+                            <div style={style} key={theme.name} onClick={() => onSelectTheme(theme)}>
+                                {theme.name}
+                            </div>
+                        );
+                    }).toArray()}
+                </div>
+            )}
+        </div>
+    );
 
 export const Themes = compose<BaseComponentProps, ThemeProps>(
-    withState("theme", "setTheme", null),
-    withState("themes", "setThemes", List()),
+    mapProps<ThemeProps, ThemeProps & ThemeExtraProps>((props) => {
+        const mappedProps: ThemeProps & ThemeExtraProps = {
+            ...props,
+            showSingleThemeButton: true,
+        };
+        const currentStoryData = props.api.getCurrentStoryData();
+        if (currentStoryData) {
+            const params: ThemeMetadataParams | undefined = props.api.getParameters(currentStoryData.id, metadataKey);
+            if (params) {
+                mappedProps.singleThemeMessage = params.singleThemeMessage;
+                if (typeof params.showSingleThemeButton === "boolean") {
+                    mappedProps.showSingleThemeButton = params.showSingleThemeButton;
+                }
+            }
+        }
+        return mappedProps;
+    }),
+    withState("stateTheme", "setStateTheme", null),
+    withState("stateThemes", "setStateThemes", List()),
     withHandlers<ThemeProps & ThemeState, ThemeHandler>({
-        onSelectTheme: ({channel, setTheme, api}) => (theme) => {
-            setTheme(theme);
+        onSelectTheme: ({channel, setStateTheme, api}) => (theme) => {
+            setStateTheme(theme);
             api.setQueryParams({theme: theme.name});
-            channel.emit("selectTheme", theme.name);
+            channel.emit("panelThemeSelected", theme);
         },
-        onReceiveThemes: ({setTheme, setThemes, channel, api}) => (newThemes: Theme[]) => {
+        onReceiveThemes: ({setStateTheme, setStateThemes, channel, api}) => (newThemes: Theme[]) => {
             const themes = List(newThemes);
             const themeName = api.getQueryParam("theme");
-            setThemes(List(themes));
+            setStateThemes(List(themes));
             if (themes.count() > 0) {
                 const theme = themes.find((t) => t.name === themeName) || themes.first();
-                setTheme(theme);
-                channel.emit("selectTheme", theme.name);
+                setStateTheme(theme);
+                api.setQueryParams({theme: theme.name});
+                channel.emit("panelThemeSelected", theme);
+            }
+        },
+        onStoryRender: ({api, channel}) => (storyId: string) => {
+            const params: ThemeMetadataParams | undefined = api.getParameters(storyId, metadataKey);
+            if (params && params.themes) {
+                channel.emit("storyThemesReceived", params.themes);
             }
         },
     }),
     lifecycle<BaseComponentProps, BaseComponentProps>({
         componentDidMount() {
-            const {channel, onReceiveThemes} = this.props;
-            channel.on("setThemes", onReceiveThemes);
+            const {api, channel, onReceiveThemes, onStoryRender} = this.props;
+            channel.on("decoratorThemesReceived", onReceiveThemes);
+            channel.on("storyThemesReceived", onReceiveThemes);
+            api.on(STORY_RENDERED, onStoryRender);
         },
         componentWillUnmount() {
             const {channel, onReceiveThemes} = this.props;
-            channel.removeListener("setThemes", onReceiveThemes);
+            channel.removeListener("decoratorThemesReceived", onReceiveThemes);
+            channel.removeListener("storyThemesReceived", onReceiveThemes);
         },
     }),
     branch<BaseComponentProps>(
-        ({theme, active}) => !theme || !active,
+        ({stateTheme, active}) => !stateTheme || !active,
         renderNothing,
     ),
 )(BaseComponent);
 
+const fontFamily: string = [
+    "-apple-system",
+    "\".SFNSText-Regular\"",
+    "\"San Francisco\"",
+    "BlinkMacSystemFont",
+    "\"Segoe UI\"",
+    "\"Roboto\"",
+    "\"Oxygen\"",
+    "\"Ubuntu\"",
+    "\"Cantarell\"",
+    "\"Fira Sans\"",
+    "\"Droid Sans\"",
+    "\"Helvetica Neue\"",
+    "\"Lucida Grande\"",
+    "\"Arial\"",
+    "sans-serif",
+].join(", ");
+
+const margin: string = "10px";
+
+const MessageStyle: React.CSSProperties = {
+    fontFamily,
+    margin,
+};
+
 const RowStyle: React.CSSProperties = {
-    padding: "10px",
+    margin,
     display: "flex",
     flexDirection: "row",
     alignItems: "flex-start",
@@ -83,8 +161,7 @@ const ButtonStyle: React.CSSProperties = {
     padding: "13px",
     marginRight: "15px",
     cursor: "pointer",
-    // tslint:disable-next-line:max-line-length
-    fontFamily: "-apple-system, \".SFNSText-Regular\", \"San Francisco\", BlinkMacSystemFont, \"Segoe UI\", \"Roboto\", \"Oxygen\", \"Ubuntu\", \"Cantarell\", \"Fira Sans\", \"Droid Sans\", \"Helvetica Neue\", \"Lucida Grande\", \"Arial\", sans-serif",
+    fontFamily,
     lineHeight: "25px",
 };
 

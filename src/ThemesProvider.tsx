@@ -6,7 +6,7 @@ import {ThemeProvider, ThemeProviderComponent} from "styled-components";
 import {Theme} from "./types/Theme";
 
 export interface ThemesProviderProps {
-    themes: List<Theme>;
+    decoratorThemes: List<Theme>;
     CustomThemeProvider?: ThemeProviderComponent<any>;
 }
 
@@ -15,18 +15,18 @@ interface ThemesProviderMapProps {
 }
 
 interface ThemesProviderState {
-    theme: Theme;
-    setTheme: (theme: Theme) => void;
+    stateTheme: Theme;
+    setStateTheme: (theme: Theme) => void;
 }
 
 interface ThemesProviderHandler {
-    onSelectTheme: (name: string) => void;
+    onSelectTheme: (theme: Theme) => void;
 }
 
 type BaseComponentProps = ThemesProviderProps & ThemesProviderMapProps & ThemesProviderState & ThemesProviderHandler;
 
-const BaseComponent: React.SFC<BaseComponentProps> = ({theme, Provider, children}) => (
-  <Provider theme={theme} children={children as any}/>
+const BaseComponent: React.SFC<BaseComponentProps> = ({stateTheme, Provider, children}) => (
+  <Provider theme={stateTheme} children={children as any}/>
 );
 
 export const ThemesProvider = compose<BaseComponentProps, ThemesProviderProps>(
@@ -35,28 +35,27 @@ export const ThemesProvider = compose<BaseComponentProps, ThemesProviderProps>(
         const Provider = CustomThemeProvider ? CustomThemeProvider : ThemeProvider;
         return {...props, Provider};
     }),
-    withState("theme", "setTheme", null),
+    withState("stateTheme", "setStateTheme", null),
     withHandlers<ThemesProviderProps & ThemesProviderMapProps & ThemesProviderState, ThemesProviderHandler>({
-        onSelectTheme: ({setTheme, themes}) => (name) => {
-            const theme = themes.find((th: Theme) => th.name === name);
-            setTheme(theme);
+        onSelectTheme: ({setStateTheme}) => (theme) => {
+            setStateTheme(theme);
         },
     }),
     lifecycle<BaseComponentProps, BaseComponentProps>({
         componentDidMount() {
-            const {onSelectTheme, themes} = this.props;
+            const {onSelectTheme, decoratorThemes} = this.props;
             const channel = addons.getChannel();
-            channel.on("selectTheme", onSelectTheme);
-            channel.emit("setThemes", themes);
+            channel.on("panelThemeSelected", onSelectTheme);
+            channel.emit("decoratorThemesReceived", decoratorThemes);
         },
         componentWillUnmount() {
             const {onSelectTheme} = this.props;
             const channel = addons.getChannel();
-            channel.removeListener("selectTheme", onSelectTheme);
+            channel.removeListener("panelThemeSelected", onSelectTheme);
         },
     }),
     branch<BaseComponentProps>(
-        (props) => !props.theme,
+        (props) => !props.stateTheme,
         renderNothing,
     ),
 )(BaseComponent);
