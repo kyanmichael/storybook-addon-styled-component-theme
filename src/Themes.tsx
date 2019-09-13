@@ -47,14 +47,14 @@ const BaseComponent: React.SFC<BaseComponentProps> =
             )}
             {(stateThemes.size > 1 || showSingleThemeButton) && (
                 <div style={RowStyle}>
-                    {stateThemes.map((th: Theme) => {
-                        const style: React.CSSProperties = ((th === stateTheme) ? SelectedButtonStyle : ButtonStyle);
+                    {stateThemes.map((theme: Theme) => {
+                        const style: React.CSSProperties = ((theme === stateTheme) ? SelectedButtonStyle : ButtonStyle);
                         const themeNameProps: object = buttonAttributes.reduce(
-                            (obj: object, attr: string) => ({ ...obj, [attr]: th.name}), {},
+                            (obj: object, attr: string) => ({ ...obj, [attr]: theme.name}), {},
                         );
                         return (
-                            <div style={style} key={th.name} onClick={() => onSelectTheme(th)} {...themeNameProps}>
-                                {th.name}
+                            <div style={style} key={theme.name} onClick={() => onSelectTheme(theme)} {...themeNameProps}>
+                                {theme.name}
                             </div>
                         );
                     }).toArray()}

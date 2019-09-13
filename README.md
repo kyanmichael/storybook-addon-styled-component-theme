@@ -99,7 +99,7 @@ storiesOf("demo", module)
 ```
 
 
-## Remind
+## Reminder
 Make sure every theme object has a `name` property
 
 
