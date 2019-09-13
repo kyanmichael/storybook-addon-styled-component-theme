@@ -66,10 +66,6 @@ The following fields (all optional) can be supplied in a `themeSelector` metadat
 * **`themes`**  –  An array of themes, overriding the `themes` passed to `addDecorator(withThemesProvider(themes))` (if any).
 * **`singleThemeMessage`**  –  A `string`, containing a message to be displayed in the "Themes" Panel when there's only one theme available.
 * **`showSingleThemeButton`**  –  A `boolean` (default `true`), specifying whether to display the single theme button when there's only one theme available.
-* **`buttonAttributes`**  –  An array of `string`s, specifying [HTML element attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes)
-  to add to the theme buttons in the "Themes" Panel (each attribute's value will be the theme's name).  This is useful for targeting the buttons
-  using [CSS attribute selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors) to programmatically click them, eg:
-  `document.querySelector('[data-theme-name="dark"]').click()`.
 
 For example:
 
@@ -79,8 +75,7 @@ const customThemes = [theme3, theme4];
 storiesOf("demo", module)
   .add("demo div", () => <div>DEMO</div>, {
     themeSelector: {
-      themes:           customThemes,
-      buttonAttributes: ["data-theme-name"]
+      themes: customThemes
     }
   });
 ```

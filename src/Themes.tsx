@@ -15,13 +15,11 @@ export interface ThemeMetadataParams {
     themes?: Theme[];
     singleThemeMessage?: string;
     showSingleThemeButton?: boolean;
-    buttonAttributes?: string[];
 }
 
 interface ThemeExtraProps {
     singleThemeMessage?: string;
     showSingleThemeButton: boolean;
-    buttonAttributes: string[];
 }
 
 interface ThemeState {
@@ -40,7 +38,7 @@ interface ThemeHandler {
 type BaseComponentProps = ThemeProps & ThemeExtraProps & ThemeState & ThemeHandler;
 
 const BaseComponent: React.SFC<BaseComponentProps> =
-    ({onSelectTheme, stateThemes, stateTheme, singleThemeMessage, showSingleThemeButton, buttonAttributes}) => (
+    ({onSelectTheme, stateThemes, stateTheme, singleThemeMessage, showSingleThemeButton}) => (
         <div>
             {stateThemes.size === 1 && singleThemeMessage && (
                 <div style={MessageStyle}>{singleThemeMessage}</div>
@@ -49,11 +47,8 @@ const BaseComponent: React.SFC<BaseComponentProps> =
                 <div style={RowStyle}>
                     {stateThemes.map((theme: Theme) => {
                         const style: React.CSSProperties = ((theme === stateTheme) ? SelectedButtonStyle : ButtonStyle);
-                        const themeNameProps: object = buttonAttributes.reduce(
-                            (obj: object, attr: string) => ({ ...obj, [attr]: theme.name}), {},
-                        );
                         return (
-                            <div style={style} key={theme.name} onClick={() => onSelectTheme(theme)} {...themeNameProps}>
+                            <div style={style} key={theme.name} onClick={() => onSelectTheme(theme)}>
                                 {theme.name}
                             </div>
                         );
@@ -68,14 +63,12 @@ export const Themes = compose<BaseComponentProps, ThemeProps>(
         const mappedProps: ThemeProps & ThemeExtraProps = {
             ...props,
             showSingleThemeButton: true,
-            buttonAttributes: [],
         };
         const currentStoryData = props.api.getCurrentStoryData();
         if (currentStoryData) {
             const params: ThemeMetadataParams | undefined = props.api.getParameters(currentStoryData.id, metadataKey);
             if (params) {
                 mappedProps.singleThemeMessage = params.singleThemeMessage;
-                mappedProps.buttonAttributes   = params.buttonAttributes || [];
                 if (typeof params.showSingleThemeButton === "boolean") {
                     mappedProps.showSingleThemeButton = params.showSingleThemeButton;
                 }
