@@ -48,7 +48,6 @@ The new params are documented in the updated `README.md`:
 > * **`themes`**  –  An array of themes, overriding the `themes` passed to `addDecorator(withThemesProvider(themes))` (if any).
 > * **`singleThemeMessage`**  –  A `string`, containing a message to be displayed in the "Themes" Panel when there's only one theme available.
 > * **`showSingleThemeButton`**  –  A `boolean` (default `true`), specifying whether to display the single theme button when there's only one theme available.
-> * **`buttonAttributes`**  –  An array of `string`s, specifying [HTML element attributes](https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes) to add to the theme buttons in the "Themes" Panel (each attribute's value will be the theme's name).  This is useful for targeting the buttons using [CSS attribute selectors](https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors) to programmatically click them, eg: `document.querySelector('[data-theme-name="dark"]').click()`.
 >
 > For example:
 >
@@ -58,8 +57,7 @@ The new params are documented in the updated `README.md`:
 > storiesOf("demo", module)
 >   .add("demo div", () => <div>DEMO</div>, {
 >     themeSelector: {
->       themes:           customThemes,
->       buttonAttributes: ["data-theme-name"]
+>       themes: customThemes
 >     }
 >   });
 > ```
@@ -85,7 +83,7 @@ Commits:
 * fe9b282  –  `withThemesProvider`: default value for `themes`
 * b7de211  –  Implement `singleThemeMessage` functionality
 * a7794ed  –  Implement `showSingleThemeButton` functionality
-* 26fdb26  –  Implement `buttonAttributes` functionality
 * 20d3b93  –  Update `Themes.spec.tsx`
 * 890d82b  –  Update `README.md`
 * a3dc4c7  –  `onReceiveThemes()`: need to call `setQueryParams()`
+* e4a1df9  –  Minor cleanup in `README.md` and `src/Themes.tsx`
